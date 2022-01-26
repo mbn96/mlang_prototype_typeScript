@@ -1,0 +1,7 @@
+expr: term ((PLUS|MINUS) term)*
+
+term: factor ((MULT|DIV) factor)*
+
+factor: INT|FLOAT
+        MINUS factor
+        L_PARAN expr R_PARAN
