@@ -1,10 +1,6 @@
 
-statement: KETWORD_VAR IDENTIFIER EQ logical
-           logical
-
-logical: compr ((LOGIC_AND| LOGIC_OR) compr)*
-
-compr: expr ((D_EQ | NOT_EQ | LESS | GRATER) expr)*
+statement: KETWORD_VAR IDENTIFIER EQ expr
+           expr
 
 expr: term ((PLUS|MINUS) term)*
       IDENTIFIER EQ expr
