@@ -175,11 +175,11 @@ export class Parser {
             this.currentToken = null;
             this.advance()
             if (this.currentToken.type === TokenType.TT_L_PARAN) {
+                this.currentToken = null;
                 this.advance();
                 const args = this.FnArgs();
                 factor = { type: NodeType.NT_FACTOR, facrorType: 'func_call', value: id, node: args }
 
-                this.currentToken = null;
                 if (this.currentToken.type === TokenType.TT_R_PARAN) {
                     this.advance();
                 } else {

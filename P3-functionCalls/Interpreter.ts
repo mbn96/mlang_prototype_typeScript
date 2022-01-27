@@ -1,17 +1,43 @@
 import {
     BaseNode, BiNode, ExprNode,
-    FactorNode, NodeType,
+    FactorNode, FnArgsNode, NodeType,
     StatementNode, TermNode
 } from './parser.js'
 
 
+export type built_in_func = (...arg) => any
+
+export interface BuiltInFunc {
+    name: string,
+    func: built_in_func
+}
+
 class Context {
 
     private variables: Record<string, number> = {}
+    private built_in_functions: Record<string, BuiltInFunc> = {}
 
     constructor() {
 
     }
+
+    //--------------- FUNCTIONS ------------------//
+
+    public addBuiltInFunctions(funcs: BuiltInFunc[]) {
+        funcs.forEach((func) => {
+            this.built_in_functions[func.name] = func
+        })
+    }
+
+    public callFunc(name: string, args: any[]) {
+        if (name in this.built_in_functions) {
+            return this.built_in_functions[name].func(...args);
+        }
+        throw new Error(`Function "${name}" is not defined in this context.`);
+    }
+
+
+    //--------------- VARIABLES ------------------//
 
     public addVar(name: string, value: number) {
         if (name in this.variables) {
@@ -52,6 +78,10 @@ export class Interpreter {
         this.ast = ast;
     }
 
+    public addBuiltInFunctions(funcs: BuiltInFunc[]) {
+        this.context.addBuiltInFunctions(funcs)
+    }
+
 
     public Solve(): number {
         return this.visit(this._ast);
@@ -67,6 +97,8 @@ export class Interpreter {
                 return this.visit_term(node as TermNode);
             case NodeType.NT_FACTOR:
                 return this.visit_factor(node as FactorNode);
+            case NodeType.NT_FN_ARGS:
+                return this.visit_fn_args(node as FnArgsNode)
         }
     }
 
@@ -132,7 +164,23 @@ export class Interpreter {
                 return this.visit(node.node);
             case 'ID':
                 return this.context.getVar(node.value as string)
+            case 'func_call':
+                const args_res = this.visit(node.node)
+                return this.context.callFunc(node.value as string, args_res)
         }
 
     }
+
+
+
+    private visit_fn_args(node: FnArgsNode) {
+        const res = []
+
+        node.nodes.forEach((val) => {
+            res.push(this.visit(val))
+        })
+
+        return res;
+    }
+
 }

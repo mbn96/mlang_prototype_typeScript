@@ -8,6 +8,12 @@ import { Interpreter } from "./Interpreter.js";
 const rl = readLine.createInterface(stdin, stdout);
 const interpreter: Interpreter = new Interpreter(null);
 
+function print(...params) {
+    console.log(...params);
+}
+
+interpreter.addBuiltInFunctions([{ name: 'print', func: print }])
+
 
 rl.on('line', (line) => {
     if (line === 'exit') {
@@ -16,12 +22,13 @@ rl.on('line', (line) => {
     }
     const lexer: Lexter = new Lexter(line);
     const tokens = lexer.tokenize();
-    console.log(tokens);
+    // console.log(tokens);
     const parser: Parser = new Parser(tokens);
     const parsRes = parser.parse();
     // console.log(JSON.stringify(parsRes, undefined, 4));
     interpreter.ast = parsRes;
-    console.log(interpreter.Solve());
+    // console.log(interpreter.Solve());
+    interpreter.Solve();
 })
 
 
