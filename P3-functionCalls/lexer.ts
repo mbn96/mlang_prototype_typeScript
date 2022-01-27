@@ -60,6 +60,9 @@ export class Lexter {
             } else if (char === ')') {
                 this.appendToken({ type: TokenType.TT_R_PARAN });
                 this.advance();
+            } else if (char === ',') {
+                this.appendToken({ type: TokenType.TT_COMMA });
+                this.advance();
             } else if (DIGITS.indexOf(char) !== -1) {
                 this.getNumber();
             } else if (LETTERS_DASH.indexOf(char) !== -1) {

@@ -10,3 +10,7 @@ term: factor ((MULT|DIV) factor)*
 factor: INT|FLOAT|IDENTIFIER
         MINUS factor
         L_PARAN expr R_PARAN
+        IDENTIFIER L_PARAN (fnArgs) R_PARAN
+
+
+fnArgs: expr (COMMA expr)*

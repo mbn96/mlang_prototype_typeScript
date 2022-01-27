@@ -4,7 +4,8 @@ export enum NodeType {
     NT_STATE = 'NT_STATE',
     NT_EXPR = 'NT_EXPR',
     NT_TERM = 'NT_TERM',
-    NT_FACTOR = 'NT_FACTOR'
+    NT_FACTOR = 'NT_FACTOR',
+    NT_FN_ARGS = 'NT_FN_ARGS'
 }
 
 
@@ -38,9 +39,13 @@ export interface TermNode extends BaseNode {
 }
 
 export interface FactorNode extends BaseNode {
-    facrorType: 'number' | 'ID' | 'minusSign' | 'paran'
+    facrorType: 'number' | 'ID' | 'minusSign' | 'paran' | 'func_call'
     value?: number | string,
     node?: BaseNode
+}
+
+export interface FnArgsNode extends BaseNode {
+    nodes?: ExprNode[]
 }
 
 export class Parser {
@@ -164,8 +169,25 @@ export class Parser {
             factor = { type: NodeType.NT_FACTOR, facrorType: 'number', value: this.currentToken.value };
             this.advance();
         } else if (this.currentToken.type === TokenType.TT_IDENTIFIER) {
-            factor = { type: NodeType.NT_FACTOR, facrorType: 'ID', value: this.currentToken.value };
-            this.advance();
+            // factor = { type: NodeType.NT_FACTOR, facrorType: 'ID', value: this.currentToken.value };
+            // this.advance();
+            const id = this.currentToken.value;
+            this.currentToken = null;
+            this.advance()
+            if (this.currentToken.type === TokenType.TT_L_PARAN) {
+                this.advance();
+                const args = this.FnArgs();
+                factor = { type: NodeType.NT_FACTOR, facrorType: 'func_call', value: id, node: args }
+
+                this.currentToken = null;
+                if (this.currentToken.type === TokenType.TT_R_PARAN) {
+                    this.advance();
+                } else {
+                    console.log('Invalid syntax: No closing paran.');
+                }
+            } else {
+                factor = { type: NodeType.NT_FACTOR, facrorType: 'ID', value: id };
+            }
         } else if (this.currentToken.type === TokenType.TT_L_PARAN) {
             this.currentToken = null // Added to hide typeScript warring...
             this.advance()
@@ -179,6 +201,24 @@ export class Parser {
         }
 
         return factor;
+    }
+
+
+    private FnArgs(): FnArgsNode {
+        const args: FnArgsNode = { type: NodeType.NT_FN_ARGS, nodes: [] };
+        if (this.currentToken.type === TokenType.TT_R_PARAN) {
+            return args;
+        }
+
+        args.nodes.push(this.expr());
+
+        while (this.currentToken.type === TokenType.TT_COMMA) {
+            this.advance();
+            args.nodes.push(this.expr());
+        }
+
+
+        return args;
     }
 
 }

@@ -10,6 +10,7 @@ export enum TokenType {
     TT_INT,
     TT_FLOAT,
     TT_EQ,
+    TT_COMMA,
     TT_KEYWORD,
     TT_IDENTIFIER,
     TT_EOF
