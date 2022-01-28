@@ -1,7 +1,5 @@
 import {
-    BaseNode, BiNode, ExprNode,
-    FactorNode, FnArgsNode, NodeType,
-    StatementNode, TermNode
+    Node, BiNode, NodeType
 } from './parser.js'
 
 
@@ -64,17 +62,17 @@ class Context {
 
 export class Interpreter {
 
-    private _ast: StatementNode;
+    private _ast: Node;
     private context: Context = new Context();
 
-    public set ast(value: StatementNode) {
+    public set ast(value: Node) {
         this._ast = value;
         // this.context = new Context();
     }
 
 
 
-    constructor(ast: StatementNode) {
+    constructor(ast: Node) {
         this.ast = ast;
     }
 
@@ -87,38 +85,97 @@ export class Interpreter {
         return this.visit(this._ast);
     }
 
-    private visit(node: BaseNode): number | any {
+    private visit(node: Node): number | any {
         switch (node.type) {
             case NodeType.NT_STATE:
-                return this.visit_statement(node as StatementNode);
+                return this.visit_statement(node);
+            case NodeType.NT_ASSIGN:
+                return this.visit_assignment(node);
+            case NodeType.NT_LOGICAL:
+                return this.visit_logical(node);
+            case NodeType.NT_COMPR:
+                return this.visit_compr(node);
             case NodeType.NT_EXPR:
-                return this.visit_expr(node as ExprNode);
+                return this.visit_expr(node);
             case NodeType.NT_TERM:
-                return this.visit_term(node as TermNode);
+                return this.visit_term(node);
             case NodeType.NT_FACTOR:
-                return this.visit_factor(node as FactorNode);
+                return this.visit_factor(node);
             case NodeType.NT_FN_ARGS:
-                return this.visit_fn_args(node as FnArgsNode)
+                return this.visit_fn_args(node)
         }
     }
 
-    private visit_statement(node: StatementNode) {
+
+
+
+
+    private visit_statement(node: Node) {
         switch (node.statementType) {
             case 'expr':
-                return this.visit(node.expr);
+                return this.visit(node.nodes as Node);
             case 'declear': {
-                const val = this.visit(node.expr);
+                const val = this.visit(node.nodes as Node);
                 this.context.addVar(node.identifier, val)
                 return val;
             }
         }
     }
 
-    private visit_expr(node: ExprNode): number {
+    private visit_assignment(node: Node): any {
+
+        switch (node.assignmentType) {
+            case 'assign': {
+                const val = this.visit(node.nodes as Node);
+                this.context.setVar(node.identifier, val)
+                return val;
+            }
+            case 'logical':
+                return this.visit(node.nodes as Node)
+        }
+
+
+    }
+
+
+    private visit_logical(node: Node): any {
+        let result: boolean
+        switch (node.logicalType) {
+            case 'NOT': {
+                const res = this.visit(node.nodes as Node)
+                result = !res;
+            } break;
+
+            case 'AND': {
+                let nodes = node.nodes as BiNode
+                result = this.visit(nodes.left) && this.visit(nodes.right);
+            } break;
+
+            case 'OR': {
+                let nodes = node.nodes as BiNode
+                result = this.visit(nodes.left) || this.visit(nodes.right);
+            } break;
+
+            case 'compr': {
+                result = this.visit(node.nodes as Node)
+            } break;
+
+        }
+
+        return !!result; // to turn it into boolean (1, 0)
+    }
+
+
+    private visit_compr(node: Node): any {
+        return this.visit(node.nodes as Node)
+    }
+
+
+    private visit_expr(node: Node): number {
 
         switch (node.exprType) {
             case 'term':
-                return this.visit(node.nodes as BaseNode);
+                return this.visit(node.nodes as Node);
             case 'plus': {
                 let nodes = node.nodes as BiNode
                 return this.visit(nodes.left) + this.visit(nodes.right);
@@ -127,20 +184,15 @@ export class Interpreter {
                 let nodes = node.nodes as BiNode
                 return this.visit(nodes.left) - this.visit(nodes.right);
             }
-            case 'assign': {
-                const val = this.visit(node.expr);
-                this.context.setVar(node.identifier, val)
-                return val;
-            }
         }
 
     }
 
-    private visit_term(node: TermNode): number {
+    private visit_term(node: Node): number {
 
         switch (node.termType) {
             case 'factor':
-                return this.visit(node.nodes as BaseNode);
+                return this.visit(node.nodes as Node);
             case 'multi': {
                 let nodes = node.nodes as BiNode
                 return this.visit(nodes.left) * this.visit(nodes.right);
@@ -153,19 +205,19 @@ export class Interpreter {
 
     }
 
-    private visit_factor(node: FactorNode): number {
+    private visit_factor(node: Node): number {
 
         switch (node.facrorType) {
             case 'number':
                 return node.value as number;
             case 'minusSign':
-                return -this.visit(node.node);
+                return -this.visit(node.nodes as Node);
             case 'paran':
-                return this.visit(node.node);
+                return this.visit(node.nodes as Node);
             case 'ID':
                 return this.context.getVar(node.value as string)
             case 'func_call':
-                const args_res = this.visit(node.node)
+                const args_res = this.visit(node.nodes as Node)
                 return this.context.callFunc(node.value as string, args_res)
         }
 
@@ -173,10 +225,10 @@ export class Interpreter {
 
 
 
-    private visit_fn_args(node: FnArgsNode) {
-        const res = []
+    private visit_fn_args(node: Node) {
+        const res = [];
 
-        node.nodes.forEach((val) => {
+        (node.nodes as Node[]).forEach((val) => {
             res.push(this.visit(val))
         })
 
