@@ -1,0 +1,29 @@
+
+
+block: (L_C_BRACKET) [statement] (R_C_BRACKET)
+
+statement: KEYWORD_VAR IDENTIFIER ASSIGN assignment
+           KEYWORD_IF L_PARAN assignment R_PARAN block (KEYWORD_ELSE block)
+           assignment
+
+assignment: IDENTIFIER ASSIGN assignment
+            logical
+
+logical: compr ((LOGIC_AND| LOGIC_OR) compr)*
+
+compr: expr ((D_EQ | NOT_EQ | LESS | GREATER) expr)*
+
+expr: term ((PLUS|MINUS) term)*
+      
+
+term: factor ((MULT|DIV) factor)*
+
+factor: INT|FLOAT|IDENTIFIER
+        MINUS factor
+        L_PARAN assignment R_PARAN
+        IDENTIFIER L_PARAN (fnArgs) R_PARAN
+        LOGICAL_NOT factor
+
+
+
+fnArgs: assignment (COMMA assignment)*

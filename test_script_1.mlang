@@ -1,6 +1,8 @@
-{
-var a = 4*5
-print(a + 2)
-var b = pow(a,2)
-print(a,b)
+if (0 || 4) {
+    var a = 4*5
+    print(a + 2)
+    var b = pow(a,2)
+    print(a,b)
+} else {
+    print(404)
 }
