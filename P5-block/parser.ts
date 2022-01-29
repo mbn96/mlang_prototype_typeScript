@@ -1,6 +1,7 @@
 import { KeywordType, Token, TokenType } from './tokens.js'
 
 export enum NodeType {
+    NT_BLOCK = 'NT_BLOCK',
     NT_STATE = 'NT_STATE',
     NT_ASSIGN = 'NT_ASSIGN',
     NT_LOGICAL = 'NT_LOGICAL',
@@ -105,15 +106,30 @@ export class Parser {
     }
 
     public parse(): Node {
-        const state: Node = this.statement()
+        const block: Node = this.block();
 
         if (this.currentToken && this.currentToken.type !== TokenType.TT_EOF) {
             console.log('Invalid syntax');
-            console.log(state);
+            console.log(block);
             return null;
         }
 
-        return state;
+        return block;
+    }
+
+    private block(): Node {
+        const block: Node = { type: NodeType.NT_BLOCK, nodes: [] }
+
+        while (this.currentToken && this.currentToken.type !== TokenType.TT_EOF) {
+            const next_node = this.statement();
+            if (!next_node) {
+                console.log('Invalid syntax. In block method...');
+                return block;
+            }
+            (block.nodes as Node[]).push(next_node);
+        }
+
+        return block;
     }
 
     private statement(): Node {

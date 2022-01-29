@@ -1,4 +1,7 @@
 
+
+block: [statement]
+
 statement: KETWORD_VAR IDENTIFIER ASSIGN assignment
            assignment
 

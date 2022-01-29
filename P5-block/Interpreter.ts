@@ -87,6 +87,8 @@ export class Interpreter {
 
     private visit(node: Node): number | any {
         switch (node.type) {
+            case NodeType.NT_BLOCK:
+                return this.visit_block(node)
             case NodeType.NT_STATE:
                 return this.visit_statement(node);
             case NodeType.NT_ASSIGN:
@@ -108,6 +110,13 @@ export class Interpreter {
 
 
 
+    private visit_block(node: Node) {
+
+        (node.nodes as Node[]).forEach((child_node) => {
+            this.visit(child_node)
+        })
+
+    }
 
 
     private visit_statement(node: Node) {

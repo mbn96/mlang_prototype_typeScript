@@ -2,7 +2,7 @@ import { Keywords, Token, TokenType } from "./tokens.js";
 
 const DIGITS = '0123456789'
 const DIGITS_DOT = DIGITS + '.';
-const WHITE_SPACE = ' \t'
+const WHITE_SPACE = ' \t\n'
 const LETTERS = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'
 const LETTERS_DASH = LETTERS + '_'
 const LETTERS_DASH_DIGITS = LETTERS_DASH + DIGITS
