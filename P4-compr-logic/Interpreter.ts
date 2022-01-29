@@ -157,17 +157,47 @@ export class Interpreter {
             } break;
 
             case 'compr': {
-                result = this.visit(node.nodes as Node)
-            } break;
+                return this.visit(node.nodes as Node)
+            }
 
         }
 
-        return !!result; // to turn it into boolean (1, 0)
+        // return !!result; // to turn it into boolean (1, 0)
+        return Boolean(result);
     }
 
 
     private visit_compr(node: Node): any {
-        return this.visit(node.nodes as Node)
+        let result: boolean;
+        switch (node.compr_type) {
+
+            case 'expr': {
+                return this.visit(node.nodes as Node);
+            }
+
+
+            case 'equal': {
+                let nodes = node.nodes as BiNode
+                result = this.visit(nodes.left) === this.visit(nodes.right);
+            } break;
+
+            case 'not_equal': {
+                let nodes = node.nodes as BiNode
+                result = this.visit(nodes.left) !== this.visit(nodes.right);
+            } break;
+
+            case 'less_than': {
+                let nodes = node.nodes as BiNode
+                result = this.visit(nodes.left) < this.visit(nodes.right);
+            } break;
+
+            case 'greater_than': {
+                let nodes = node.nodes as BiNode
+                result = this.visit(nodes.left) > this.visit(nodes.right);
+            } break;
+        }
+
+        return Boolean(result)
     }
 
 

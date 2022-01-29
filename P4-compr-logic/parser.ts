@@ -18,6 +18,7 @@ export interface Node {
     statementType?: 'declear' | 'expr'
     assignmentType?: 'assign' | 'logical'
     logicalType?: 'NOT' | 'AND' | 'OR' | 'compr'
+    compr_type?: 'equal' | 'not_equal' | 'less_than' | 'greater_than' | 'expr'
     exprType?: 'plus' | 'minus' | 'term'
     termType?: 'multi' | 'div' | 'factor'
     facrorType?: 'number' | 'ID' | 'minusSign' | 'paran' | 'func_call'
@@ -181,7 +182,24 @@ export class Parser {
         return logical;
     }
     private compr(): Node {
-        return { type: NodeType.NT_COMPR, nodes: this.expr() }
+
+        let compr: Node = { type: NodeType.NT_COMPR, compr_type: 'expr', nodes: this.expr() }
+
+        while (this.checkTokenType(this.currentToken, TokenType.TT_EQ, TokenType.TT_NOT_EQ, TokenType.TT_LESS, TokenType.TT_GREATER)) {
+            let token = this.currentToken;
+            this.advance()
+            compr = {
+                type: NodeType.NT_COMPR,
+                compr_type:
+                    token.type === TokenType.TT_EQ ? 'equal' :
+                        token.type === TokenType.TT_NOT_EQ ? 'not_equal' :
+                            token.type === TokenType.TT_LESS ? 'less_than' : 'greater_than',
+                nodes: { left: compr, right: this.expr() }
+            };
+
+        }
+
+        return compr;
     }
 
     private expr(): Node {
