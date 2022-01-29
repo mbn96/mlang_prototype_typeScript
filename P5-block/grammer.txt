@@ -1,0 +1,25 @@
+
+statement: KETWORD_VAR IDENTIFIER ASSIGN assignment
+           assignment
+
+assignment: IDENTIFIER ASSIGN assignment
+            logical
+
+logical: compr ((LOGIC_AND| LOGIC_OR) compr)*
+
+compr: expr ((D_EQ | NOT_EQ | LESS | GREATER) expr)*
+
+expr: term ((PLUS|MINUS) term)*
+      
+
+term: factor ((MULT|DIV) factor)*
+
+factor: INT|FLOAT|IDENTIFIER
+        MINUS factor
+        L_PARAN assignment R_PARAN
+        IDENTIFIER L_PARAN (fnArgs) R_PARAN
+        LOGICAL_NOT factor
+
+
+
+fnArgs: assignment (COMMA assignment)*
