@@ -1,4 +1,6 @@
+{
 var a = 4*5
 print(a + 2)
 var b = pow(a,2)
 print(a,b)
+}
